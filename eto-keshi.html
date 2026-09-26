@@ -51,52 +51,90 @@ button:active{transform:scale(.94);opacity:.9}
 button:focus-visible{outline:3px solid var(--shu);outline-offset:3px}
 button.is-pressed{transform:scale(.92);opacity:.88}
 
-/* タイトル（黒市の干支） */
+/* タイトル（和） */
 #title{
-  justify-content:space-between;gap:12px;
+  justify-content:flex-start;gap:10px;
   background:
-    radial-gradient(ellipse 120% 80% at 50% 0%,rgba(183,57,42,.35),transparent 55%),
-    linear-gradient(180deg,#1a1510 0%,#090807 42%,#120f0c 100%);
+    radial-gradient(ellipse 130% 70% at 50% 8%,rgba(183,57,42,.42),transparent 62%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='45'%3E%3Cg fill='none' stroke='%23d4a843' stroke-opacity='.11' stroke-width='1.4'%3E%3Cpath d='M-45 45a45 45 0 0 1 90 0M0 45a45 45 0 0 1 90 0M45 45a45 45 0 0 1 90 0'/%3E%3Cpath d='M-45 45a30 30 0 0 1 90 0M0 45a30 30 0 0 1 90 0M45 45a30 30 0 0 1 90 0'/%3E%3Cpath d='M-45 45a15 15 0 0 1 90 0M0 45a15 15 0 0 1 90 0M45 45a15 15 0 0 1 90 0'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg,#1b1611 0%,#0b0907 46%,#141009 100%);
+  background-size:auto, 68px 34px, 100% 100%;
   color:#f3ecdf;position:relative;overflow:hidden;
-  padding:max(18px, env(safe-area-inset-top,0px)) 16px max(22px, calc(env(safe-area-inset-bottom,0px) + 12px));
-  box-shadow:inset 0 0 0 3px var(--shu),inset 0 0 0 6px rgba(212,168,67,.25);
+  padding:max(16px, env(safe-area-inset-top,0px)) 16px max(20px, calc(env(safe-area-inset-bottom,0px) + 10px));
+  box-shadow:inset 0 0 0 2px #b7392a,inset 0 0 0 5px rgba(212,168,67,.32),inset 0 0 90px rgba(0,0,0,.6);
 }
-#title::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:12px;pointer-events:none;
-  background:repeating-linear-gradient(90deg,#111 0 14px,#e8c84a 14px 28px);
+#title::after{ /* 麻の葉の帯 */
+  content:'';position:absolute;left:0;right:0;bottom:0;height:14px;pointer-events:none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cg fill='none' stroke='%230c0a08' stroke-width='1.2'%3E%3Cpath d='M0 7h28M14 0v14M0 0l14 7L0 14M28 0L14 7l14 7'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(#d4a843,#a97f22);
+  background-size:28px 14px,100% 100%;
+  border-top:1px solid #6b4f12;
 }
+/* 角印（朱） */
 .brand{
-  position:relative;z-index:1;display:inline-block;margin:0;
-  font-family:"Dela Gothic One",sans-serif;font-size:12px;letter-spacing:.34em;color:#ff2a3a;
-  border:2px solid #ff2a3a;padding:4px 8px 4px 12px;transform:rotate(-7deg);
+  position:relative;z-index:2;align-self:flex-end;margin:0;
+  font-family:"Yuji Syuku",serif;font-size:13px;line-height:1.15;letter-spacing:.10em;
+  writing-mode:vertical-rl;text-orientation:upright;
+  color:#fdf3e4;background:#b7392a;border:2px solid #e2705c;border-radius:2px;
+  padding:9px 5px;transform:rotate(3deg);
+  box-shadow:0 2px 6px rgba(0,0,0,.55);
 }
-.ring{position:relative;width:min(82vw,340px);aspect-ratio:1;z-index:1;flex:0 1 auto}
-.ring::before{
-  content:'';position:absolute;inset:8%;border-radius:50%;
-  border:2px dashed rgba(232,200,74,.55);
+.ring{position:relative;width:min(84vw,344px);aspect-ratio:1;z-index:1;flex:0 0 auto;margin:auto}
+.ring::before{ /* 円相 */
+  content:'';position:absolute;inset:7%;border-radius:50%;
+  border:2px solid rgba(212,168,67,.55);
+  box-shadow:inset 0 0 26px rgba(212,168,67,.12);
 }
-.ring span{position:absolute;left:50%;top:50%;font-size:clamp(18px,5.5vw,24px);transform:translate(-50%,-50%);filter:none;
-  display:flex;flex-direction:column;align-items:center;line-height:1.05;font-family:"Yuji Syuku",serif;color:#f6f1e6;
-  text-shadow:0 1px 0 #090807,0 0 8px rgba(0,0,0,.45)}
-.ring span .em{font-size:clamp(20px,5.5vw,26px);font-family:"Apple Color Emoji","Segoe UI Emoji",sans-serif;line-height:1}
-.ring span img.em{width:clamp(28px,8vw,38px);height:clamp(28px,8vw,38px);object-fit:contain;display:block}
-.ring .cat{color:#ffb347;text-shadow:0 0 10px rgba(255,180,80,.55),0 1px 0 #090807}
-.title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring::after{
+  content:'';position:absolute;inset:13%;border-radius:50%;
+  border:1px solid rgba(183,57,42,.45);
+}
+.ring span{position:absolute;left:50%;top:50%;font-size:clamp(15px,4.4vw,19px);transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1;font-family:"Yuji Syuku",serif;color:#e9d9ac;
+  text-shadow:0 1px 0 #090807,0 0 8px rgba(0,0,0,.6)}
+.ring span img.em{width:clamp(26px,7.4vw,34px);height:clamp(26px,7.4vw,34px);object-fit:contain;display:block;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.ring .cat{color:#f0b64e}
+.title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.tcol{display:flex;flex-direction:row-reverse;align-items:flex-start;gap:7px}
 .title h1{
   margin:0;font-family:"Yuji Syuku",serif;font-weight:400;
-  font-size:clamp(40px,13vw,58px);line-height:1.05;color:#f6f1e6;letter-spacing:.12em;
-  text-shadow:3px 3px 0 var(--shu3),-2px -1px 0 var(--kin);
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-size:clamp(31px,8.8vw,42px);line-height:1.02;letter-spacing:.06em;inline-size:max-content;
+  color:#fbf6ea;
+  text-shadow:0 3px 0 #6b1c12, 2px 0 0 rgba(212,168,67,.9), -2px 0 0 rgba(212,168,67,.45), 0 0 18px rgba(0,0,0,.8);
 }
-.title p{margin:10px 0 0;font-family:"Yuji Syuku",serif;font-size:15px;letter-spacing:.28em;color:var(--kin)}
+.title .kao{
+  display:block;width:clamp(40px,11vw,52px);height:clamp(40px,11vw,52px);object-fit:contain;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.7));
+}
+.title p{
+  margin:0;font-family:"Yuji Syuku",serif;font-size:12px;letter-spacing:.20em;color:#e0cfa2;
+  writing-mode:vertical-rl;text-orientation:upright;padding-top:6px;inline-size:max-content
+}
+.rakkan{
+  transform:rotate(-4deg);font-style:normal;flex:0 0 auto;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  background:#b7392a;color:#fdf3e4;border-radius:2px;
+  font-family:"Yuji Syuku",serif;font-size:19px;line-height:1;
+  box-shadow:0 2px 7px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.28);
+}
+/* 木札のボタン */
 .hanko{
-  position:relative;z-index:1;
-  background:#090807;color:#f6f1e6;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:22px;
-  min-height:56px;min-width:min(86vw,320px);width:min(86vw,320px);padding:14px 36px;border:3px solid #ff2a3a;border-radius:0;letter-spacing:.18em;touch-action:manipulation;
-  box-shadow:5px 5px 0 #e8c84a;transition:transform .08s ease;
+  position:relative;z-index:1;margin-top:0;
+  background:linear-gradient(180deg,#c84634 0%,#ab3223 46%,#8e2419 100%);
+  color:#fdf6e6;font-family:"Yuji Syuku",serif;font-weight:400;font-size:25px;
+  min-height:58px;min-width:min(78vw,300px);width:min(78vw,300px);padding:13px 30px;
+  border:2px solid #e8c84a;border-radius:3px;letter-spacing:.46em;text-indent:.46em;touch-action:manipulation;
+  text-shadow:0 2px 0 rgba(70,16,10,.85);
+  box-shadow:0 5px 0 #5c1710,0 8px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.28);
+  transition:transform .08s ease,box-shadow .08s ease;
 }
-.hanko:active,.hanko.is-pressed{transform:scale(.92)}
+.hanko:active,.hanko.is-pressed{transform:translateY(4px);box-shadow:0 1px 0 #5c1710,0 2px 6px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.2)}
 .note{font-size:12px;color:var(--usu);text-align:center;line-height:1.45;max-width:36em;margin:0;flex-shrink:0}
-.best{font-size:13px;color:var(--shu)}
+.best{font-size:13px;color:#e9d9ac;font-family:"Yuji Syuku",serif;letter-spacing:.18em;position:relative;z-index:1}
+.best:empty{display:none}
 
 /* 干支えらび */
 .sel{
@@ -137,7 +175,7 @@ button.is-pressed{transform:scale(.92);opacity:.88}
 .hud .snd{flex:0 0 48px;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:20px;padding:0;touch-action:manipulation}
 .hud .snd.off{opacity:.45}
 
-#wrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;touch-action:none}
+#wrap{flex:1;min-height:0;width:100%;display:flex;align-items:flex-end;justify-content:center;touch-action:none}
 .garan{
   position:relative;padding:8px 8px 10px;border-radius:3px;
   background:linear-gradient(90deg,var(--shu3),var(--shu) 16%,var(--shu2) 50%,var(--shu) 84%,var(--shu3));
@@ -162,26 +200,60 @@ canvas{display:block;border-radius:2px;touch-action:none;box-shadow:inset 0 0 0 
 .rule b{color:var(--shu);font-weight:700}
 .quit{background:transparent;color:var(--usu);font-size:13px;text-decoration:underline;padding:12px 10px;min-height:48px;flex-shrink:0;touch-action:manipulation}
 
-#result{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#090807;z-index:5;padding:max(20px, env(safe-area-inset-top,0px)) 20px max(20px, env(safe-area-inset-bottom,0px))}
+#result{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:5;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% 0%,rgba(183,57,42,.30),transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='%23d4a843' fill-opacity='.14'%3E%3Ccircle cx='14' cy='22' r='1.6'/%3E%3Ccircle cx='62' cy='8' r='1.1'/%3E%3Ccircle cx='96' cy='40' r='1.7'/%3E%3Ccircle cx='34' cy='70' r='1.2'/%3E%3Ccircle cx='80' cy='92' r='1.5'/%3E%3Ccircle cx='18' cy='104' r='1'/%3E%3Ccircle cx='110' cy='74' r='1.1'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg,#171208,#0a0806);
+  background-size:auto,120px 120px,100% 100%;
+  padding:max(20px, env(safe-area-inset-top,0px)) 20px max(20px, env(safe-area-inset-bottom,0px))}
 #result.on{display:flex}
 #result::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:12px;pointer-events:none;
-  background:repeating-linear-gradient(90deg,#111 0 14px,#e8c84a 14px 28px);
+  content:'';position:absolute;left:0;right:0;bottom:0;height:14px;pointer-events:none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cg fill='none' stroke='%230c0a08' stroke-width='1.2'%3E%3Cpath d='M0 7h28M14 0v14M0 0l14 7L0 14M28 0L14 7l14 7'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(#d4a843,#a97f22);
+  background-size:28px 14px,100% 100%;
 }
+/* 奉書紙の書付 */
 .card{
-  position:relative;background:#090807;color:#f6f1e6;border-radius:0;padding:28px 22px 22px;width:100%;max-width:330px;text-align:center;
-  border:3px solid #ff2a3a;box-shadow:8px 8px 0 #e8c84a;
+  position:relative;color:#2b2520;border-radius:2px;padding:24px 20px 20px;width:100%;max-width:334px;text-align:center;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg stroke='%23a08a5e' stroke-opacity='.16' stroke-width='.8'%3E%3Cpath d='M0 15h60M0 30h60M0 45h60'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg,#f6ecd6,#e6d7b6);
+  background-size:60px 60px,100% 100%;
+  border:1px solid #a58f62;
+  box-shadow:0 14px 34px rgba(0,0,0,.55),inset 0 0 0 5px rgba(255,255,255,.45),inset 0 0 0 6px #b7392a;
 }
-.card h3{margin:8px 0 0;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:clamp(40px,12vw,56px);line-height:1;text-shadow:4px 4px 0 #ff2a3a}
-.card .big{font-family:"Dela Gothic One",sans-serif;font-size:42px;font-weight:400;color:#e8c84a;line-height:1.1;margin:10px 0 2px;font-variant-numeric:tabular-nums}
-.card .sub{font-size:14px;margin:4px 0;letter-spacing:.12em;color:#f6f1e6}
+.card .brand{ /* 角印 */
+  position:absolute;top:-14px;right:14px;align-self:auto;margin:0;z-index:2;
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-family:"Yuji Syuku",serif;font-size:13px;letter-spacing:.10em;line-height:1.15;
+  color:#fdf3e4;background:#b7392a;border:2px solid #e2705c;border-radius:2px;padding:8px 5px;transform:rotate(4deg);
+  box-shadow:0 2px 6px rgba(0,0,0,.45);
+}
+.card h3{
+  margin:6px 0 0;font-family:"Yuji Syuku",serif;font-weight:400;font-size:clamp(34px,10vw,46px);line-height:1.1;
+  color:#2b2520;letter-spacing:.14em;
+  text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+.card h3::after{
+  content:'';display:block;width:58%;height:2px;margin:8px auto 0;
+  background:linear-gradient(90deg,transparent,#b7392a 22%,#b7392a 78%,transparent);
+}
+.card .big{font-family:"Yuji Syuku",serif;font-size:46px;font-weight:400;color:#8e2419;line-height:1.1;margin:10px 0 0;font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 0 rgba(255,255,255,.6)}
+.card .sub{font-family:"Yuji Syuku",serif;font-size:14px;margin:5px 0 0;letter-spacing:.18em;color:#5c4f3c}
 .card .rank:empty{display:none}
-.card .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.card .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
 .card .row button{min-height:52px;min-width:44%}
-.card .ghost{background:transparent;color:#f6f1e6;border:2px solid #f6f1e6;border-radius:0;padding:12px 16px;font-weight:700;font-family:"Dela Gothic One",sans-serif;letter-spacing:.08em}
+.card .hanko{margin-top:0;min-width:46%;width:auto;font-size:19px;letter-spacing:.24em;text-indent:.24em;padding:12px 16px}
+.card .ghost{background:transparent;color:#5c4f3c;border:1px solid #9d8158;border-radius:2px;padding:12px 14px;
+  font-family:"Yuji Syuku",serif;font-weight:400;font-size:15px;letter-spacing:.10em}
+.card .ghost:active,.card .ghost.is-pressed{background:rgba(183,57,42,.10)}
 @media (prefers-reduced-motion: reduce){ .hanko:active{transform:none} .garan{transform:none!important} }
 @media (max-height: 640px){
-  .ring{width:min(56vw,220px)}
+  .ring{width:min(62vw,250px)}
   .sel h2{font-size:22px}
   .grid12 button{min-height:56px;padding:4px 2px}
   .note{font-size:11px}
@@ -195,8 +267,11 @@ canvas{display:block;border-radius:2px;touch-action:none;box-shadow:inset 0 0 0 
     <p class="brand">流通禁止</p>
     <div class="ring" id="ring">
       <div class="title">
-        <h1>干支けし</h1>
-        <p>猫は残る。</p>
+        <div class="tcol">
+          <h1>干支けし</h1>
+          <p>猫は残る。</p>
+        </div>
+        <i class="rakkan" aria-hidden="true">猫</i>
       </div>
     </div>
     <button class="hanko" id="btnStart">消せ</button>
@@ -240,6 +315,11 @@ canvas{display:block;border-radius:2px;touch-action:none;box-shadow:inset 0 0 0 
   </div>
 </div>
 
+<audio id="bgm" loop playsinline preload="none">
+  <source src="Twelve_Symbols_Rising.m4a" type="audio/mp4">
+  <source src="Twelve_Symbols_Rising.mp3" type="audio/mpeg">
+</audio>
+
 <script src="animals.js"></script>
 <script>
 (() => {
@@ -251,7 +331,8 @@ const ETO = [
   ['酉','🐔','とり','#b23a5e'], ['戌','🐶','いぬ','#4e6fa3'], ['亥','🐗','い','#5a6b3a']
 ];
 const COLS = 7, ROWS = 8, CAT = -1, MOVES = 30, CAT_RATE = 0.09, KINDS = 12;
-const ETO_SPR = bakeEtoSprites(128);
+const ETO_SPR = bakeEtoSprites(160);
+const NEKO_SPR = bakeNekoSprite(160);
 const TAU = Math.PI * 2;
 const KANSUJI = ['','','二','三','四','五','六','七','八','九'];
 const $ = id => document.getElementById(id);
@@ -268,6 +349,8 @@ function saveMute(v){ try{ localStorage.setItem('tg.262.mute', v ? '1' : '0') }c
 // ---------- sound ----------
 let ac = null, master = null, bgmGain = null, muted = loadMute();
 let bgmOn = false, bgmStep = 0, bgmNext = 0;
+/* 曲（MP3/M4A）。iOSは <audio> の volume を無視するので必ずWebAudioのGainを通す */
+let bgmEl = null, bgmRouted = false, mp3State = 'wait';
 const BGM_BPM = 78, BGM_BEAT = 60 / BGM_BPM;
 const RITSU_BGM = [0, 2, 5, 7, 9, 12, 14, 17]; /* 律音階の度数 */
 const bgmRoot = () => 293.66; /* ダ */
@@ -277,9 +360,25 @@ function ensureGraph(){
   const a = audio(); if(!a || master) return;
   master = a.createGain(); master.gain.value = muted ? 0 : 1; master.connect(a.destination);
   bgmGain = a.createGain(); bgmGain.gain.value = 0; bgmGain.connect(master);
+  const el = $('bgm');
+  if(el){
+    bgmEl = el;
+    try{ a.createMediaElementSource(el).connect(bgmGain); bgmRouted = true }
+    catch(e){ bgmRouted = false }   // 経路が作れなければ要素の音量で代用する
+  }
   bgmOn = true; bgmStep = 0; bgmNext = a.currentTime + 0.1;
 }
+function bgmPlay(){
+  if(!bgmEl || muted) return;
+  const p = bgmEl.play();
+  if(p && p.catch) p.catch(() => {});   // 自動再生拒否は次のタップで拾う
+}
+function bgmPause(){ if(bgmEl){ try{ bgmEl.pause() }catch(e){} } }
 function setMasterMute(){
+  if(bgmEl){
+    bgmEl.muted = muted && !bgmRouted;
+    if(muted) bgmPause();
+  }
   if(!master) return;
   master.gain.setTargetAtTime(muted ? 0 : 1, ac.currentTime, 0.08);
 }
@@ -289,8 +388,13 @@ function syncBgmVol(){
   const inPlay = running && $('game').classList.contains('on');
   const resultOn = $('result').classList.contains('on');
   const want = bgmOn && !muted && onScr && !resultOn;
-  const v = want ? (inPlay ? 0.11 : 0.075) : 0;
-  bgmGain.gain.setTargetAtTime(v, ac.currentTime, 0.18);
+  const useMp3 = mp3State !== 'fail' && !!bgmEl;
+  const v = want ? (useMp3 ? (inPlay ? 0.62 : 0.40) : (inPlay ? 0.11 : 0.075)) : 0;
+  bgmGain.gain.setTargetAtTime(v, ac.currentTime, 0.35);
+  if(bgmEl){
+    if(!bgmRouted) bgmEl.volume = want ? (inPlay ? 0.62 : 0.40) : 0;
+    if(want && useMp3) bgmPlay(); else bgmPause();
+  }
 }
 function playBgmPluck(freq, when, vol){
   if(!ac || !bgmGain || when < ac.currentTime - 0.02) return;
@@ -314,6 +418,7 @@ function playBgmNote(freq, dur, type, vol, when){
   o.start(when); o.stop(when + dur + 0.05);
 }
 function bgmTick(){
+  if(mp3State !== 'fail') return;          // 曲が鳴っている間は合成BGMを止める
   if(!ac || !bgmGain || muted || !bgmOn) return;
   const t = ac.currentTime;
   while(bgmNext < t + 0.35){
@@ -333,7 +438,17 @@ function bgmTick(){
   }
 }
 function unlock(){ ensureGraph(); const a = audio(); if(a && a.state === 'suspended') a.resume().then(syncBgmVol).catch(syncBgmVol); else syncBgmVol(); }
-document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') unlock(); });
+(function bindBgmEl(){
+  const el = $('bgm'); if(!el) return;
+  el.addEventListener('canplay', () => { if(mp3State === 'wait'){ mp3State = 'ok'; syncBgmVol() } });
+  el.addEventListener('playing', () => { mp3State = 'ok' });
+  el.addEventListener('error', () => { mp3State = 'fail'; syncBgmVol() });
+  el.addEventListener('stalled', () => { if(mp3State === 'wait') mp3State = 'fail' });
+})();
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') unlock();
+  else bgmPause();
+});
 function tone(f1, f2, dur, type='triangle', vol=.12){
   const a = audio(); if(!a || muted) return;
   ensureGraph();
@@ -414,10 +529,10 @@ function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList
     s.style.left = (50 + Math.cos(a) * 44) + '%';
     s.style.top  = (50 + Math.sin(a) * 44) + '%';
     if(it.cat) s.className = 'cat';
-    const em = it.cat ? document.createElement('span') : document.createElement('img');
+    const em = document.createElement('img');
     em.className = 'em';
-    if(it.cat) em.textContent = it.em;
-    else { em.src = ETO_SPR[it.k].toDataURL(); em.alt = it.kj }
+    em.src = (it.cat ? NEKO_SPR : ETO_SPR[it.k]).toDataURL();
+    em.alt = it.kj;
     const kj = document.createElement('span');
     kj.textContent = it.kj;
     s.appendChild(em); s.appendChild(kj);
@@ -738,8 +853,8 @@ function catReady(t){
 }
 
 function drawEtoMark(k, R, y){
-  const s = R * 1.38;
-  ctx.drawImage(ETO_SPR[k], -s / 2, y - s * 0.56, s, s);
+  const s = R * 1.26;                       // 猫の顔と同じ見かけの大きさに揃える
+  ctx.drawImage(ETO_SPR[k], -s / 2, y - s * 0.5, s, s);
 }
 function drawEtoLabel(e, R){
   ctx.fillStyle = 'rgba(21,17,13,.58)';
@@ -751,26 +866,6 @@ function strokeKanji(txt, x, y, size, fill, stroke, lw){
   ctx.font = `${size}px "Yuji Syuku",serif`;
   ctx.lineWidth = lw; ctx.strokeStyle = stroke; ctx.strokeText(txt, x, y);
   ctx.fillStyle = fill; ctx.fillText(txt, x, y);
-}
-
-function drawCatFace(R, ready){
-  const sc = R * 0.95;
-  ctx.fillStyle = ready ? '#ffe8c8' : '#e8dcc8';
-  ctx.beginPath(); ctx.ellipse(0, sc * 0.08, sc * 0.52, sc * 0.44, 0, 0, TAU); ctx.fill();
-  ctx.fillStyle = ready ? '#f4a55a' : '#c98a52';
-  [[-1,-1],[1,-1]].forEach(([sx]) => {
-    ctx.beginPath(); ctx.moveTo(sx * sc * 0.22, -sc * 0.22);
-    ctx.lineTo(sx * sc * 0.55, -sc * 0.62); ctx.lineTo(sx * sc * 0.05, -sc * 0.38); ctx.closePath(); ctx.fill();
-  });
-  ctx.fillStyle = '#2b2520';
-  ctx.beginPath(); ctx.ellipse(-sc * 0.18, -sc * 0.02, sc * 0.07, sc * 0.09, 0, 0, TAU);
-  ctx.ellipse(sc * 0.18, -sc * 0.02, sc * 0.07, sc * 0.09, 0, 0, TAU); ctx.fill();
-  ctx.strokeStyle = 'rgba(43,37,32,.35)'; ctx.lineWidth = 1;
-  for(let i = -1; i <= 1; i += 2){
-    ctx.beginPath(); ctx.moveTo(sc * 0.24 * i, sc * 0.06); ctx.lineTo(sc * 0.62 * i, sc * 0.1); ctx.stroke();
-  }
-  ctx.fillStyle = '#b7392a';
-  ctx.beginPath(); ctx.arc(0, sc * 0.12, sc * 0.05, 0, TAU); ctx.fill();
 }
 
 // 軒丸瓦（のきまるがわら）の蓮華文タイル — draw() から呼ぶ
@@ -850,7 +945,7 @@ function drawTile(t, pulse){
     ctx.lineWidth = ready ? 3.5 + pulse*2 : 2.5;
     ctx.strokeStyle = ready ? `rgba(212,168,67,${.75 + pulse*.25})` : '#b7392a'; ctx.stroke();
     ctx.fillStyle = 'rgba(255,248,235,.12)'; rr(-R*.78, -R*.78, R*1.56, R*1.56, R*.08); ctx.fill();
-    drawCatFace(R, ready);
+    { const s = R * 1.26; ctx.drawImage(NEKO_SPR, -s / 2, -R * 0.12 - s * 0.5, s, s) }
     strokeKanji('猫', 0, R * 0.82, R * 0.30, '#f6f1e6', '#2b2520', Math.max(2, R * 0.07));
     if(ready){
       ctx.font = `700 ${R * 0.20}px "Zen Maru Gothic",sans-serif`;
@@ -874,7 +969,7 @@ function drawTile(t, pulse){
     ctx.beginPath(); ctx.arc(0, 0, R*.955, 0, TAU); ctx.stroke();
     ctx.beginPath(); ctx.arc(0, 0, R*.22, 0, TAU); ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill();
     if(mine){ ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.lineWidth = 3.5; ctx.strokeStyle = '#d4a843'; ctx.stroke() }
-    drawEtoMark(t.k, R, -R * 0.06);
+    drawEtoMark(t.k, R, -R * 0.12);
     drawEtoLabel(e, R);
     if(t.fl > 0){
       ctx.beginPath(); ctx.arc(0, 0, R*1.02, 0, TAU);
