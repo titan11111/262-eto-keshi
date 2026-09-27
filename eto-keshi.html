@@ -275,7 +275,6 @@ canvas{display:block;border-radius:2px;touch-action:none;box-shadow:inset 0 0 0 
 <div id="app">
 
   <section class="screen on" id="title">
-    <p class="brand">流通禁止</p>
     <div class="ring" id="ring">
       <div class="title">
         <div class="tcol">
@@ -300,7 +299,7 @@ canvas{display:block;border-radius:2px;touch-action:none;box-shadow:inset 0 0 0 
       </div>
       <p class="arrow">↘ 子 → 丑 → 寅 で消える</p>
       <p>② <strong>同じ干支3つ</strong>、または<strong>十二支の順に3つ</strong>で消えます。逆順も、戌→亥→子のような一周も有効です。</p>
-      <p>③ 自分の干支が消えると、隣の猫も一緒に消えて高得点。手詰まりなら「自分の干支けし」で盤面の自分の干支を消せます。<strong>1ゲーム2回まで</strong>。</p>
+      <p>③ 自分の干支が消えると、隣の猫も一緒に消えて高得点。手詰まりなら「猫けし」で盤面の猫をまとめて消せます（1匹50点）。<strong>1ゲーム2回まで</strong>。</p>
       <button class="hanko" id="btnHow">干支を選ぶ</button>
     </div>
   </section>
@@ -322,7 +321,7 @@ canvas{display:block;border-radius:2px;touch-action:none;box-shadow:inset 0 0 0 
     <div id="wrap"><div class="garan" id="garan"><canvas id="cv"></canvas></div></div>
     <div class="foot">
       <p class="rule">縦横斜めに交換。3つそろえて消す。<b id="ruleMe">寅</b>の隣の猫も消える。</p>
-      <button class="rescue" id="btnRescue" disabled>自分の干支けし<br><span id="vRescue">あと2回</span></button>
+      <button class="rescue" id="btnRescue" disabled>猫けし<br><span id="vRescue">あと2回</span></button>
       <button class="quit" id="btnQuit">やめる</button>
     </div>
   </section>
@@ -594,6 +593,9 @@ bindTap($('btnReselect'), () => { $('result').classList.remove('on'); show('sele
 const cv = $('cv'), ctx = cv.getContext('2d'), garan = $('garan');
 let my = loadMe() ?? 2, kinds = [], grid = [], tiles = [], parts = [], floats = [], waves = [], beams = [];
 let score = 0, moves = MOVES, cats = 0, rescues = 2, stuck = false, busy = false, sel = null, running = false, cs = 48, dpr = 1;
+// 迷ったら光らせる：最後に消してからの経過秒。HINT_SEC で光り出す
+const HINT_SEC = 30;
+let idle = 0, hintCells = [];
 let uid = 0, shake = 0, flash = 0, hs = 0, bg = null;
 
 function pickKinds(){
@@ -677,6 +679,24 @@ function hasMoves(){
   return false;
 }
 
+// 1手で消せる組を1つだけ返す（交換する2マス＋そろう3マス）
+function findHint(){
+  for(let r = 0; r < ROWS; r++) for(let c = 0; c < COLS; c++){
+    for(const [dr, dc] of [[0,1],[1,0],[1,1],[1,-1]]){
+      const r2 = r+dr, c2 = c+dc; if(r2 >= ROWS || c2 < 0 || c2 >= COLS) continue;
+      swapGrid({r,c}, {r:r2,c:c2});
+      const m = findMatches();
+      swapGrid({r,c}, {r:r2,c:c2});
+      if(m.size){
+        const idx = new Set(m);
+        idx.add(r*COLS + c); idx.add(r2*COLS + c2);      // 交換する2マスも光らせる（重複はSetで潰す）
+        return [...idx].map(i => ({ r: i / COLS | 0, c: i % COLS }));
+      }
+    }
+  }
+  return [];
+}
+
 function shuffle(){
   for(let tries = 0; tries < 60; tries++){
     const ks = tiles.filter(t => !t.dying).map(t => t.k);
@@ -733,6 +753,11 @@ function step(now){
   }else if(garan.style.transform){ garan.style.transform = '' }
   if(flash > 0) flash = Math.max(0, flash - dt * 2.2);
   if(settleWaiters.length && settled()){ const w = settleWaiters; settleWaiters = []; w.forEach(f => f()) }
+  // 迷っている時間を数える：手を動かせる状態で HINT_SEC 秒止まったらキラキラで教える
+  if(running && !busy && !stuck && moves > 0 && !$('result').classList.contains('on')){
+    idle += raw;
+    if(idle >= HINT_SEC && !hintCells.length) hintCells = findHint();
+  }
   bgmTick(); syncBgmVol();
   draw(now);
   requestAnimationFrame(step);
@@ -867,6 +892,27 @@ function draw(now){
   const pulse = .5 + .5*Math.sin(now/260);
   for(const t of tiles) drawTile(t, pulse);
 
+  if(hintCells.length){
+    const k = RM ? .6 : .5 + .5*Math.sin(now/200);
+    ctx.save();
+    for(const h of hintCells){
+      const x = (h.c+.5)*cs, y = (h.r+.5)*cs, R = cs*.46;
+      ctx.globalAlpha = .30 + k*.45;
+      ctx.strokeStyle = '#ffe9b0'; ctx.lineWidth = Math.max(1.5, cs*.055);
+      ctx.beginPath(); ctx.arc(x, y, R*(1.02 + k*.10), 0, TAU); ctx.stroke();
+      ctx.fillStyle = '#fff6df';
+      for(let i = 0; i < 4; i++){
+        const a = (RM ? 0 : now/700) + i/4*TAU, d = R*(1.12 + k*.16);
+        const sx = x + Math.cos(a)*d, sy = y + Math.sin(a)*d, s = cs*(.05 + k*.035);
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - s); ctx.lineTo(sx + s*.30, sy - s*.30); ctx.lineTo(sx + s, sy);
+        ctx.lineTo(sx + s*.30, sy + s*.30); ctx.lineTo(sx, sy + s); ctx.lineTo(sx - s*.30, sy + s*.30);
+        ctx.lineTo(sx - s, sy); ctx.lineTo(sx - s*.30, sy - s*.30); ctx.closePath(); ctx.fill();
+      }
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+
   for(const w of waves){
     const k = 1 - w.life/w.max;
     ctx.globalAlpha = (1-k) * .95;
@@ -976,6 +1022,7 @@ function hud(){
 function startGame(){
   unlock();
   pickKinds(); score = 0; moves = MOVES; cats = 0; rescues = 2; stuck = false; busy = false; sel = null;
+  idle = 0; hintCells = [];
   parts = []; floats = []; waves = []; beams = []; shake = 0; flash = 0; hs = 0;
   $('vMe').textContent = ETO[my][0] + '・' + ETO[my][2];
   $('ruleMe').textContent = ETO[my][0];
@@ -1047,9 +1094,10 @@ async function resolveMatches(m){
     await waitSettle();
     m = findMatches();
   }
+  idle = 0; hintCells = [];                 // 盤が動いたらヒントを消して数え直す
   if(moves <= 0){ await sleep(400); endGame(); return }
   stuck = !hasMoves();
-  if(stuck && rescues > 0) floatText('手詰まり！干支けしを使おう', COLS/2 - .5, ROWS/2 - .5, '#ffe6a3');
+  if(stuck && rescues > 0) floatText('手詰まり！猫けしを使おう', COLS/2 - .5, ROWS/2 - .5, '#ffe6a3');
   if(stuck && rescues <= 0){ floatText('シャッフル', COLS/2 - .5, ROWS/2 - .5, '#b3a488'); shuffle(); stuck = false }
   busy = false;
   hud();
@@ -1057,12 +1105,37 @@ async function resolveMatches(m){
 
 bindTap($('btnRescue'), async () => {
   if(busy || !stuck || rescues <= 0 || moves <= 0) return;
-  const own = new Set();
-  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]?.k === my) own.add(r*COLS+c);
-  if(!own.size){ shuffle(); stuck = false; hud(); return }
+  const catIdx = [];
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]?.k === CAT) catIdx.push(r*COLS+c);
+  if(!catIdx.length){ shuffle(); stuck = false; hud(); return }   // 猫がいないときは消費せずシャッフル
   busy = true; rescues--; stuck = false; hud();
-  await resolveMatches(own);
+  await eraseCats(catIdx);
 });
+
+// 盤面の猫をまとめて消す（1匹50点）。手数は消費しない
+async function eraseCats(idxs){
+  const gained = idxs.length * 50;
+  score += gained; cats += idxs.length;
+  sfx.pop(1, idxs.length);
+  setTimeout(sfx.nya, 80);
+  buzz(Math.min(60, 12 + idxs.length * 5));
+  hs = .10; shake = Math.min(9, 2.6 + idxs.length * .9);
+  flash = Math.min(1, .28 + idxs.length * .08);
+  let sumC = 0, sumR = 0;
+  idxs.forEach(idx => {
+    const r = idx / COLS | 0, c = idx % COLS, t = grid[r][c];
+    burst(c, r, '#d4a843', 18); ring(c, r, 'rgba(212,168,67,.95)'); beam(c, r);
+    t.dying = true; t.age = 0; grid[r][c] = null; sumC += c; sumR += r;
+    floatText('にゃ！', c, r, '#ffe6a3');
+  });
+  floatText('猫けし　+' + gained, sumC/idxs.length, sumR/idxs.length, '#ffe6a3', true);
+  hud();
+  await sleep(235);
+  tiles = tiles.filter(t => !t.dying);
+  gravity();
+  await waitSettle();
+  await resolveMatches(findMatches());   // 落ちて偶然そろったぶんは連鎖として扱う
+}
 
 function gravity(){
   for(let c = 0; c < COLS; c++){
