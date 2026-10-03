@@ -700,9 +700,7 @@ function randKind(){ return Math.random() < CAT_RATE ? CAT : drawEtoFromBag() }
 
 function cellRejected(r, c, k){
   if(k === CAT) return false;
-  return wouldTripleAt(r, c, k) ||
-    (c >= 2 && grid[r][c - 1]?.k === k && grid[r][c - 2]?.k === k) ||
-    (r >= 2 && grid[r - 1][c]?.k === k && grid[r - 2][c]?.k === k);
+  return wouldTripleAt(r, c, k);
 }
 function newTile(k, r, c, startY){
   const t = { k, r, c, x: c, y: startY ?? r, s: 1, dying: false, age: 0, fl: 0, rot: 0, sq: 0, fall: false, id: uid++ };
@@ -778,10 +776,19 @@ function trioMatch(a, b, c){
 }
 function wouldTripleAt(r, c, k){
   if(k === CAT) return false;
-  for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){
-    const a = grid[r-2*dr]?.[c-2*dc]?.k;
-    const b = grid[r-dr]?.[c-dc]?.k;
-    if(a !== undefined && b !== undefined && trioMatch(a,b,k)) return true;
+  for(const [dr, dc] of [[0,1],[1,0],[1,1],[1,-1]]){
+    for(let o = -2; o <= 0; o++){
+      const vals = [];
+      for(let i = 0; i < 3; i++){
+        const t = o + i;
+        const rr = r + t * dr, cc = c + t * dc;
+        if(rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS){ vals = null; break; }
+        const v = t === 0 ? k : grid[rr][cc]?.k;
+        if(v === undefined || v === null){ vals = null; break; }
+        vals.push(v);
+      }
+      if(vals && vals.length === 3 && isEtoK(vals[0]) && isEtoK(vals[1]) && isEtoK(vals[2]) && trioMatch(vals[0], vals[1], vals[2])) return true;
+    }
   }
   return false;
 }
@@ -1391,7 +1398,13 @@ function gravity(){
       const t = grid[r][c];
       if(t){ grid[r][c] = null; grid[w][c] = t; t.r = w; w--; }
     }
-    for(let r = w; r >= 0; r--) grid[r][c] = newTile(randKind(), r, c, r - (w + 1));
+    for(let r = w; r >= 0; r--){
+      let k, guard = 0;
+      do{
+        k = randKind(); guard++;
+      }while(k !== CAT && guard < 40 && cellRejected(r, c, k));
+      grid[r][c] = newTile(k, r, c, r - (w + 1));
+    }
   }
 }
 
