@@ -655,7 +655,7 @@ bindTap($('bOK'), () => commit());
 
 // ---------- game state ----------
 const cv = $('cv'), ctx = cv.getContext('2d'), garan = $('garan');
-let my = loadMe() ?? 2, kinds = [], spawnBag = [], grid = [], tiles = [], parts = [], floats = [], waves = [], beams = [];
+let my = loadMe() ?? 2, kinds = [], spawnBag = [], etoSeen = new Uint8Array(ETO_COUNT), grid = [], tiles = [], parts = [], floats = [], waves = [], beams = [];
 let score = 0, timeLeft = TIME, cleared = 0, cats = 0, rescues = 2, stuck = false, busy = false, sel = null, running = false, ended = false, cs = 48, dpr = 1;
 // 迷ったら光らせる：最後に消してからの経過秒。HINT_SEC で光り出す
 const HINT_SEC = 30;
@@ -664,8 +664,15 @@ let uid = 0, shake = 0, flash = 0, hs = 0, bg = null;
 let axis = null, lifted = false, lift = 0, ang = 0, orig = [], pick = null;
 
 function resetKinds(){ kinds = ETO.map((_, i) => i) }
+function resetEtoSeen(){ etoSeen.fill(0) }
+function noteKind(k){ if(k >= 0 && k < ETO_COUNT) etoSeen[k] = 1 }
+function scanBoardKinds(){
+  for(let r = 0; r < ROWS; r++) for(let c = 0; c < COLS; c++){
+    const t = grid[r][c]; if(t) noteKind(t.k);
+  }
+}
 
-// 補充は袋方式（各干支を同数ずつ混ぜてから取る）→ 連続で同じ干支ばかり出る偏りを抑える
+// 補充は袋方式。未登場の干支は優先して出す（1ゲームで見えない種を防ぐ）
 function refillSpawnBag(per = 3){
   spawnBag = [];
   for(let k = 0; k < ETO_COUNT; k++) for(let i = 0; i < per; i++) spawnBag.push(k);
@@ -675,31 +682,87 @@ function refillSpawnBag(per = 3){
   }
 }
 function drawEtoFromBag(){
+  const missing = [];
+  for(let k = 0; k < ETO_COUNT; k++) if(!etoSeen[k]) missing.push(k);
+  if(missing.length){
+    const k = missing[Math.random() * missing.length | 0];
+    const i = spawnBag.indexOf(k);
+    if(i >= 0) spawnBag.splice(i, 1);
+    noteKind(k);
+    return k;
+  }
   if(!spawnBag.length) refillSpawnBag();
-  return spawnBag.pop();
+  const k = spawnBag.pop();
+  noteKind(k);
+  return k;
 }
 function randKind(){ return Math.random() < CAT_RATE ? CAT : drawEtoFromBag() }
+
+function cellRejected(r, c, k){
+  if(k === CAT) return false;
+  return wouldTripleAt(r, c, k) ||
+    (c >= 2 && grid[r][c - 1]?.k === k && grid[r][c - 2]?.k === k) ||
+    (r >= 2 && grid[r - 1][c]?.k === k && grid[r - 2][c]?.k === k);
+}
 function newTile(k, r, c, startY){
   const t = { k, r, c, x: c, y: startY ?? r, s: 1, dying: false, age: 0, fl: 0, rot: 0, sq: 0, fall: false, id: uid++ };
   tiles.push(t); return t;
 }
 
 function makeBoard(){
-  tiles = []; grid = [];
-  for(let r = 0; r < ROWS; r++){
-    grid.push([]);
-    for(let c = 0; c < COLS; c++){
+  tiles = [];
+  const coords = [];
+  for(let r = 0; r < ROWS; r++) for(let c = 0; c < COLS; c++) coords.push({ r, c });
+  for(let i = coords.length - 1; i > 0; i--){
+    const j = Math.random() * (i + 1) | 0;
+    [coords[i], coords[j]] = [coords[j], coords[i]];
+  }
+  const anchor = coords.slice(0, ETO_COUNT);
+  const rest = coords.slice(ETO_COUNT);
+
+  let built = false;
+  for(let attempt = 0; attempt < 80 && !built; attempt++){
+    grid = [];
+    for(let r = 0; r < ROWS; r++) grid.push(new Array(COLS).fill(null));
+    tiles = [];
+    const order = ETO.map((_, i) => i);
+    for(let i = order.length - 1; i > 0; i--){
+      const j = Math.random() * (i + 1) | 0;
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    let fail = false;
+    for(let i = 0; i < ETO_COUNT; i++){
+      const { r, c } = anchor[i], k = order[i];
+      if(cellRejected(r, c, k)){ fail = true; break; }
+      grid[r][c] = newTile(k, r, c, r - ROWS - 1);
+    }
+    if(fail) continue;
+    refillSpawnBag(4);
+    for(const { r, c } of rest){
       let k, guard = 0;
       do{
         k = randKind(); guard++;
-      }while(k !== CAT && guard < 30 && (
-        wouldTripleAt(r, c, k) ||
-        (c >= 2 && grid[r][c-1].k === k && grid[r][c-2].k === k) ||
-        (r >= 2 && grid[r-1][c].k === k && grid[r-2][c].k === k)
-      ));
-      grid[r].push(newTile(k, r, c, r - ROWS - 1));
+      }while(k !== CAT && guard < 40 && cellRejected(r, c, k));
+      grid[r][c] = newTile(k, r, c, r - ROWS - 1);
+    }
+    if(findMatches().size === 0 && hasMoves()) built = true;
+  }
+
+  if(!built){
+    tiles = []; grid = [];
+    refillSpawnBag();
+    for(let r = 0; r < ROWS; r++){
+      grid.push([]);
+      for(let c = 0; c < COLS; c++){
+        let k, guard = 0;
+        do{
+          k = randKind(); guard++;
+        }while(k !== CAT && guard < 30 && cellRejected(r, c, k));
+        grid[r].push(newTile(k, r, c, r - ROWS - 1));
+      }
     }
   }
+  scanBoardKinds();
   if(!hasMoves()) shuffle();
 }
 
@@ -817,11 +880,14 @@ function shuffle(){
     for(let i = ks.length - 1; i > 0; i--){ const j = Math.random()*(i+1)|0; [ks[i], ks[j]] = [ks[j], ks[i]] }
     let n = 0;
     for(let r = 0; r < ROWS; r++) for(let c = 0; c < COLS; c++) grid[r][c].k = ks[n++];
-    if(findMatches().size === 0 && hasMoves()) return true;
+    if(findMatches().size === 0 && hasMoves()){
+      scanBoardKinds();
+      return true;
+    }
   }
   // 猫が多すぎて詰んだら、猫に少しどいてもらう
   const catTiles = tiles.filter(t => t.k === CAT);
-  catTiles.slice(0, 4).forEach(t => t.k = drawEtoFromBag());
+  catTiles.slice(0, 4).forEach(t => { t.k = drawEtoFromBag() });
   floatText('猫がどいてくれた', COLS/2, ROWS/2, '#f1e8d4');
   return shuffle();
 }
@@ -1201,7 +1267,7 @@ function hud(){
 // ---------- flow ----------
 function startGame(){
   unlock();
-  resetKinds(); refillSpawnBag(); score = 0; timeLeft = TIME; cleared = 0; cats = 0; rescues = 2; stuck = false; busy = false; sel = null; ended = false;
+  resetKinds(); resetEtoSeen(); refillSpawnBag(); score = 0; timeLeft = TIME; cleared = 0; cats = 0; rescues = 2; stuck = false; busy = false; sel = null; ended = false;
   axis = null; lifted = false; lift = 0; ang = 0; orig = []; pick = null;
   idle = 0; hintCells = [];
   parts = []; floats = []; waves = []; beams = []; shake = 0; flash = 0; hs = 0;
