@@ -301,7 +301,7 @@ canvas{display:block;border-radius:2px;touch-action:none;box-shadow:inset 0 0 0 
   <section class="screen how" id="how">
     <div class="card">
       <h2>遊びかた</h2>
-      <p>① 干支をひとつ選びます。盤面の駒を<strong>縦・横・斜め</strong>に入れ替えて、3つを一列にそろえましょう。</p>
+      <p>① 干支をひとつ選びます。盤には<strong>十二支すべて</strong>の駒が出ます（猫だけは例外）。駒を<strong>縦・横・斜め</strong>に入れ替えて、3つを一列にそろえましょう。</p>
       <div class="diagram" aria-label="子、丑、寅を斜めにそろえる例">
         <span class="pick">子</span><span>卯</span><span>申</span>
         <span>午</span><span class="pick">丑</span><span>亥</span>
@@ -374,7 +374,8 @@ const ETO = [
   ['午','🐴','うま','#b93c2c'], ['未','🐑','ひつじ','#cdbf9a'], ['申','🐵','さる','#a86234'],
   ['酉','🐔','とり','#b23a5e'], ['戌','🐶','いぬ','#4e6fa3'], ['亥','🐗','い','#5a6b3a']
 ];
-const COLS = 9, ROWS = 12, CAT = -1, TIME = 180, CAT_RATE = 0.09, KINDS = 12;
+const COLS = 9, ROWS = 12, CAT = -1, TIME = 180, CAT_RATE = 0.09;
+const ETO_COUNT = 12; // 1ゲームで出現する干支は常に12種すべて（猫は別確率）
 const RANK = [600, 450, 300, 150];   // 消した枚数のしきい値（神域／達人／一人前／端数）
 // 根拠（WebKit 390×844・3分の自動プレイ実測）: 即断ボット=294手/1380枚、1.2秒考えるボット=104手/450枚。1手あたり約4.3枚
 const ETO_SPR = bakeEtoSprites(160);
@@ -635,7 +636,7 @@ bindTap($('bOK'), () => commit());
 
 // ---------- game state ----------
 const cv = $('cv'), ctx = cv.getContext('2d'), garan = $('garan');
-let my = loadMe() ?? 2, kinds = [], grid = [], tiles = [], parts = [], floats = [], waves = [], beams = [];
+let my = loadMe() ?? 2, kinds = [], spawnBag = [], grid = [], tiles = [], parts = [], floats = [], waves = [], beams = [];
 let score = 0, timeLeft = TIME, cleared = 0, cats = 0, rescues = 2, stuck = false, busy = false, sel = null, running = false, ended = false, cs = 48, dpr = 1;
 // 迷ったら光らせる：最後に消してからの経過秒。HINT_SEC で光り出す
 const HINT_SEC = 30;
@@ -643,12 +644,22 @@ let idle = 0, hintCells = [];
 let uid = 0, shake = 0, flash = 0, hs = 0, bg = null;
 let axis = null, lifted = false, lift = 0, ang = 0, orig = [], pick = null;
 
-function pickKinds(){
-  const others = ETO.map((_, i) => i).filter(i => i !== my);
-  for(let i = others.length - 1; i > 0; i--){ const j = Math.random()*(i+1)|0; [others[i], others[j]] = [others[j], others[i]] }
-  kinds = [my, ...others.slice(0, KINDS - 1)];
+function resetKinds(){ kinds = ETO.map((_, i) => i) }
+
+// 補充は袋方式（各干支を同数ずつ混ぜてから取る）→ 連続で同じ干支ばかり出る偏りを抑える
+function refillSpawnBag(per = 3){
+  spawnBag = [];
+  for(let k = 0; k < ETO_COUNT; k++) for(let i = 0; i < per; i++) spawnBag.push(k);
+  for(let i = spawnBag.length - 1; i > 0; i--){
+    const j = Math.random() * (i + 1) | 0;
+    [spawnBag[i], spawnBag[j]] = [spawnBag[j], spawnBag[i]];
+  }
 }
-function randKind(){ return Math.random() < CAT_RATE ? CAT : kinds[Math.random()*kinds.length|0] }
+function drawEtoFromBag(){
+  if(!spawnBag.length) refillSpawnBag();
+  return spawnBag.pop();
+}
+function randKind(){ return Math.random() < CAT_RATE ? CAT : drawEtoFromBag() }
 function newTile(k, r, c, startY){
   const t = { k, r, c, x: c, y: startY ?? r, s: 1, dying: false, age: 0, fl: 0, rot: 0, sq: 0, fall: false, id: uid++ };
   tiles.push(t); return t;
@@ -791,7 +802,7 @@ function shuffle(){
   }
   // 猫が多すぎて詰んだら、猫に少しどいてもらう
   const catTiles = tiles.filter(t => t.k === CAT);
-  catTiles.slice(0, 4).forEach(t => t.k = kinds[Math.random()*kinds.length|0]);
+  catTiles.slice(0, 4).forEach(t => t.k = drawEtoFromBag());
   floatText('猫がどいてくれた', COLS/2, ROWS/2, '#f1e8d4');
   return shuffle();
 }
@@ -1162,7 +1173,7 @@ function hud(){
 // ---------- flow ----------
 function startGame(){
   unlock();
-  pickKinds(); score = 0; timeLeft = TIME; cleared = 0; cats = 0; rescues = 2; stuck = false; busy = false; sel = null; ended = false;
+  resetKinds(); refillSpawnBag(); score = 0; timeLeft = TIME; cleared = 0; cats = 0; rescues = 2; stuck = false; busy = false; sel = null; ended = false;
   axis = null; lifted = false; lift = 0; ang = 0; orig = []; pick = null;
   idle = 0; hintCells = [];
   parts = []; floats = []; waves = []; beams = []; shake = 0; flash = 0; hs = 0;
